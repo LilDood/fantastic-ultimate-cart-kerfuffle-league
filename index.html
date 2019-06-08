@@ -1,17 +1,68 @@
 <html>
     <head>
-        <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js"></script>
+        <script src="https://unpkg.com/semantic-ui-vue/dist/umd/semantic-ui-vue.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css">
     </head>
     <body>
-        <div id='app'>
-            <table>
-                <tr><th>Racer</th><th>Points</th><th>Crashes</th></tr>
-                <tr v-for="racer in results">
-                    <td>{{ racer.name }}</td>
-                    <td>{{ racer.points }}</td>
-                    <td>{{ racer.crashes }}</td>
-                </tr>
-            </table>
+        <div id='app' class="main ui text container">
+            <div style="margin-top:2em;">
+                <div class="ui huge header">Fantastic Ultimate Cart Kerfuffle League</div>
+                <sui-form>
+                    <sui-grid>
+                        <sui-grid-column :width=5>
+                            <sui-form-field>
+                                <label>Year</label>
+                                <sui-dropdown
+                                    :options="filterOptions.years"
+                                    placeholder="Year"
+                                    selection
+                                    v-model="filter.year"
+                                />
+                            </sui-form-field>
+                        </sui-grid-column>
+                        <sui-grid-column :width=5>
+                            <sui-form-field>
+                                <label>Month</label>
+                                <sui-dropdown
+                                    :options="filterOptions.months"
+                                    placeholder="Month"
+                                    selection
+                                    v-model="filter.month"
+                                />
+                            </sui-form-field>
+                        </sui-grid-column>
+                        <sui-grid-column :width=5>
+                            <sui-form-field>
+                                <label>Race</label>
+                                <sui-dropdown
+                                    :options="filterOptions.races"
+                                    placeholder="Race"
+                                    selection
+                                    v-model="filter.race"
+                                />
+                            </sui-form-field>
+                        </sui-grid-column>
+                    </sui-grid>
+                </sui-form>
+            </div>
+
+            <sui-table celled>
+                <sui-table-header>
+                    <sui-table-row>
+                        <sui-table-header-cell>Racer</sui-table-header-cell>
+                        <sui-table-header-cell>Points</sui-table-header-cell>
+                        <sui-table-header-cell>Crashes</sui-table-header-cell>
+                    </sui-table-row>
+                </sui-table-header>
+                <sui-table-body>
+                    <sui-table-row v-for="racer in results">
+                        <sui-table-cell>{{racer.name}}</sui-table-cell>
+                        <sui-table-cell>{{racer.points}}</sui-table-cell>
+                        <sui-table-cell>{{racer.crashes}}</sui-table-cell>
+                    </sui-table-row>
+                </sui-table-body>
+            </sui-table>
         </div>
         <script>
             function loadRaces(data){
@@ -47,11 +98,22 @@
             }
 
             function updateRaces(){
-                app.races = window.races;
+                var races = window.races;
+                app.races = races;
+                app.filterOptions.years = [{ key: "", value: "", text: "All"}].concat(Array.from(new Set(races.map(r => r.year))).map(i => { return { key: i, value: i, text: i }}));
+                app.filterOptions.months = [{ key: "", value: "", text: "All"}].concat(Array.from(new Set(races.map(r => r.month))).map(i => { return { key: i, value: i, text: i }}));
+                app.filterOptions.races = [{ key: "", value: "", text: "All"}].concat(races.map(r => r.date).map(i => { return { key: i, value: i, text: i }}));
             }
 
             function updateResults(){
-                app.results = aggregateResults(window.results);
+                var results = window.results;
+                app.results = aggregateResults(results);
+                var racers = {};
+                for(var i = 0, len = results.length; i < len; i++){
+                    var r = results[i];
+                    racers[r.user_id] = r.user_name;
+                };
+                app.filterOptions.racers = Object.keys(racers).map(id => {return {value: id, text: racers[id]}});
             }
 
             function filterResults(filters, results){
@@ -85,11 +147,24 @@
                 return output.sort((a, b) => b.points - a.points);
             }
 
-            var app = new Vue({
+            Vue.use(SemanticUIVue);
+            window.app = new Vue({
                 el: '#app',
                 data: {
                     races: [],
-                    results: []
+                    results: [],
+                    filter:{
+                        year: "",
+                        month: "",
+                        race: "",
+                        racer: ""
+                    },
+                    filterOptions: {
+                        racers: [],
+                        years: [],
+                        months: [],
+                        races: []
+                    }
                 }
             })
         </script>
