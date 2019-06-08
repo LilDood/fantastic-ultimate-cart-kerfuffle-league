@@ -1,9 +1,18 @@
 <html>
     <head>
-
+        <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     </head>
     <body>
-        <div id='wrapper'></div>
+        <div id='app'>
+            <table>
+                <tr><th>Racer</th><th>Points</th><th>Crashes</th></tr>
+                <tr v-for="racer in results">
+                    <td>{{ racer.name }}</td>
+                    <td>{{ racer.points }}</td>
+                    <td>{{ racer.crashes }}</td>
+                </tr>
+            </table>
+        </div>
         <script>
             function loadRaces(data){
                 window.races = data.feed.entry.map(r => {return {
@@ -17,6 +26,7 @@
                     racers: parseInt(r.gsx$racers.$t),
                     notes: r.gsx$notes.$t
                 }});
+                updateRaces();
             }
 
             function loadResults(data){
@@ -33,7 +43,15 @@
                     bestlap: r.gsx$bestlap.$t,
                     bestlap_seconds: parseInt(r.gsx$bestlapseconds.$t)
                 }});
-                renderResults(document.getElementById('wrapper'), aggregateResults(window.results))
+                updateResults();
+            }
+
+            function updateRaces(){
+                app.races = window.races;
+            }
+
+            function updateResults(){
+                app.results = aggregateResults(window.results);
             }
 
             function filterResults(filters, results){
@@ -56,9 +74,10 @@
                         leaders[id] = user;
                     }
 
-                    user.points += r.points
+                    user.points += r.points;
+                    user.name = r.user_name;
                     if(r.note === 'CRASHED'){
-                        user.crashes += 1
+                        user.crashes += 1;
                     }
                 });
                 var output = Object.keys(leaders).map(k => leaders[k]);
@@ -66,16 +85,13 @@
                 return output.sort((a, b) => b.points - a.points);
             }
 
-            function renderResults(destination, leaderboard){
-                Array.from(destination.children).forEach(element => {
-                    destination.removeChild(element);
-                });
-                leaderboard.forEach(user => {
-                    var p = document.createElement('p');
-                    destination.appendChild(p);
-                    p.innerText = `${user.name} ${user.points}`;
-                });
-            }
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    races: [],
+                    results: []
+                }
+            })
         </script>
         <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/oj41qk/public/values?alt=json-in-script&callback=loadRaces"></script>
         <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/orpmas5/public/values?alt=json-in-script&callback=loadResults"></script>
