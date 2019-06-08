@@ -1,0 +1,83 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <div id='wrapper'></div>
+        <script>
+            function loadRaces(data){
+                window.races = data.feed.entry.map(r => {return {
+                    date: r.gsx$date.$t,
+                    id: parseInt(r['gsx$raceno.'].$t),
+                    laps: parseInt(r.gsx$laps.$t),
+                    link: r.gsx$link.$t,
+                    month: r.gsx$month.$t,
+                    year: r.gsx$year.$t,
+                    track: r.gsx$track.$t,
+                    racers: parseInt(r.gsx$racers.$t),
+                    notes: r.gsx$notes.$t
+                }});
+            }
+
+            function loadResults(data){
+                window.results = data.feed.entry.map(r => {return {
+                    car: r.gsx$car.$t,
+                    note: r.gsx$note.$t,
+                    points: parseInt(r.gsx$points.$t),
+                    position: parseInt(r.gsx$position.$t),
+                    race_id: parseInt(r['gsx$raceno.'].$t),
+                    user_id: r.gsx$racerid.$t,
+                    user_name: r.gsx$racername.$t,
+                    time: r.gsx$time.$t,
+                    time_seconds: parseInt(r.gsx$timeseconds.$t),
+                    bestlap: r.gsx$bestlap.$t,
+                    bestlap_seconds: parseInt(r.gsx$bestlapseconds.$t)
+                }});
+                renderResults(document.getElementById('wrapper'), aggregateResults(window.results))
+            }
+
+            function filterResults(filters, results){
+                return results;
+            }
+
+            function aggregateResults(results){
+                var leaders = {};
+                results.forEach(r => {
+                    var id = r.user_id;
+                    var user = null;
+                    if(Object.keys(leaders).indexOf(id) >= 0){
+                        user = leaders[id];
+                    }else{
+                        user = {
+                            name: r.user_name,
+                            points: 0,
+                            crashes: 0
+                        }
+                        leaders[id] = user;
+                    }
+
+                    user.points += r.points
+                    if(r.note === 'CRASHED'){
+                        user.crashes += 1
+                    }
+                });
+                var output = Object.keys(leaders).map(k => leaders[k]);
+
+                return output.sort((a, b) => b.points - a.points);
+            }
+
+            function renderResults(destination, leaderboard){
+                Array.from(destination.children).forEach(element => {
+                    destination.removeChild(element);
+                });
+                leaderboard.forEach(user => {
+                    var p = document.createElement('p');
+                    destination.appendChild(p);
+                    p.innerText = `${user.name} ${user.points}`;
+                });
+            }
+        </script>
+        <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/oj41qk/public/values?alt=json-in-script&callback=loadRaces"></script>
+        <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/orpmas5/public/values?alt=json-in-script&callback=loadResults"></script>
+    </body>
+</html>
