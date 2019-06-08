@@ -14,7 +14,7 @@
                             <sui-form-field>
                                 <label>Year</label>
                                 <sui-dropdown
-                                    :options="filterOptions.years"
+                                    :options="mappedYears"
                                     placeholder="Year"
                                     selection
                                     v-model="filter.year"
@@ -25,7 +25,7 @@
                             <sui-form-field>
                                 <label>Month</label>
                                 <sui-dropdown
-                                    :options="filterOptions.months"
+                                    :options="filteredMonths"
                                     placeholder="Month"
                                     selection
                                     v-model="filter.month"
@@ -36,7 +36,7 @@
                             <sui-form-field>
                                 <label>Race</label>
                                 <sui-dropdown
-                                    :options="filterOptions.races"
+                                    :options="filteredRaces"
                                     placeholder="Race"
                                     selection
                                     v-model="filter.race"
@@ -56,7 +56,7 @@
                     </sui-table-row>
                 </sui-table-header>
                 <sui-table-body>
-                    <sui-table-row v-for="racer in results">
+                    <sui-table-row v-for="racer in filteredResults">
                         <sui-table-cell>{{racer.name}}</sui-table-cell>
                         <sui-table-cell>{{racer.points}}</sui-table-cell>
                         <sui-table-cell>{{racer.crashes}}</sui-table-cell>
@@ -66,7 +66,7 @@
         </div>
         <script>
             function loadRaces(data){
-                window.races = data.feed.entry.map(r => {return {
+                app.races = data.feed.entry.map(r => {return {
                     date: r.gsx$date.$t,
                     id: parseInt(r['gsx$raceno.'].$t),
                     laps: parseInt(r.gsx$laps.$t),
@@ -77,11 +77,10 @@
                     racers: parseInt(r.gsx$racers.$t),
                     notes: r.gsx$notes.$t
                 }});
-                updateRaces();
             }
 
             function loadResults(data){
-                window.results = data.feed.entry.map(r => {return {
+                app.results = data.feed.entry.map(r => {return {
                     car: r.gsx$car.$t,
                     note: r.gsx$note.$t,
                     points: parseInt(r.gsx$points.$t),
@@ -94,31 +93,75 @@
                     bestlap: r.gsx$bestlap.$t,
                     bestlap_seconds: parseInt(r.gsx$bestlapseconds.$t)
                 }});
-                updateResults();
             }
 
-            function updateRaces(){
-                var races = window.races;
-                app.races = races;
-                app.filterOptions.years = [{ key: "", value: "", text: "All"}].concat(Array.from(new Set(races.map(r => r.year))).map(i => { return { key: i, value: i, text: i }}));
-                app.filterOptions.months = [{ key: "", value: "", text: "All"}].concat(Array.from(new Set(races.map(r => r.month))).map(i => { return { key: i, value: i, text: i }}));
-                app.filterOptions.races = [{ key: "", value: "", text: "All"}].concat(races.map(r => r.date).map(i => { return { key: i, value: i, text: i }}));
+            function mappedYears(){
+                var self = this;
+                return [{ key: "", value: "", text: "All"}].concat(
+                    Array.from(new Set(self.races.map(r => r.year))).map(i => { return { key: i, value: i, text: i }}));
             }
 
-            function updateResults(){
-                var results = window.results;
-                app.results = aggregateResults(results);
-                var racers = {};
-                for(var i = 0, len = results.length; i < len; i++){
-                    var r = results[i];
-                    racers[r.user_id] = r.user_name;
-                };
-                app.filterOptions.racers = Object.keys(racers).map(id => {return {value: id, text: racers[id]}});
+            function filteredMonths(){
+                var self = this;
+                var races = self.races;
+
+                if(self.filter.year !== ""){
+                    races = races.filter(r => r.year === self.filter.year);
+                }
+
+                return [{ key: "", value: "", text: "All"}].concat(
+                    Array.from(new Set(races.map(r => r.month))).map(i => { return { key: i, value: i, text: i }}));
             }
 
-            function filterResults(filters, results){
-                return results;
+            function filteredRaces(){
+                var self = this;
+                var races = self.races;
+
+                if(self.filter.year !== ""){
+                    races = races.filter(r => r.year === self.filter.year);
+                }
+                if(self.filter.month !== ""){
+                    races = races.filter(r => r.month === self.filter.month);
+                }
+
+                return [{ key: "", value: "", text: "All"}].concat(races.map(r => r.date).map(i => { return { key: i, value: i, text: i }}));
             }
+
+            function filteredResults(){
+                var self = this;
+                var results = self.results;
+                var races = self.races;
+
+                if(self.filter.year !== ""){
+                    races = races.filter(r => r.year === self.filter.year);
+                }
+                if(self.filter.month !== ""){
+                    races = races.filter(r => r.month === self.filter.month);
+                }
+                if(self.filter.race !== ""){
+                    races = races.filter(r => r.date === self.filter.race);
+                }
+
+                var race_ids = races.map(r => r.id);
+                results = self.results.filter(r => race_ids.indexOf(r.race_id) >= 0);
+
+                return aggregateResults(results);
+            }
+
+            function mappedRacers(){
+
+            }
+
+            // function updateResults(){
+            //     var results = window.results;
+            //     app.results = aggregateResults(results);
+            //     var racers = {};
+            //     for(var i = 0, len = results.length; i < len; i++){
+            //         var r = results[i];
+            //         racers[r.user_id] = r.user_name;
+            //     };
+            //     app.filterOptions.racers = Object.keys(racers).map(id => {return {value: id, text: racers[id]}});
+            // }
 
             function aggregateResults(results){
                 var leaders = {};
@@ -165,6 +208,13 @@
                         months: [],
                         races: []
                     }
+                },
+                computed: {
+                    mappedYears,
+                    filteredMonths,
+                    filteredRaces,
+                    mappedRacers,
+                    filteredResults
                 }
             })
         </script>
