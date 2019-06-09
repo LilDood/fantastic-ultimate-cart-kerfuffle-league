@@ -9,7 +9,7 @@
             <div style="margin-top:2em;">
                 <div class="ui huge header">Fantastic Ultimate Cart Kerfuffle League</div>
                 <sui-form>
-                    <sui-grid>
+                    <sui-grid :columns=15 centered>
                         <sui-grid-column :width=5>
                             <sui-form-field>
                                 <label>Year</label>
@@ -50,13 +50,15 @@
             <sui-table celled>
                 <sui-table-header>
                     <sui-table-row>
+                        <sui-table-header-cell>Rank</sui-table-header-cell>
                         <sui-table-header-cell>Racer</sui-table-header-cell>
                         <sui-table-header-cell>Points</sui-table-header-cell>
                         <sui-table-header-cell>Crashes</sui-table-header-cell>
                     </sui-table-row>
                 </sui-table-header>
                 <sui-table-body>
-                    <sui-table-row v-for="racer in filteredResults">
+                    <sui-table-row v-for="(racer, index) in filteredResults">
+                        <sui-table-cell>{{index + 1}}</sui-table-cell>
                         <sui-table-cell>{{racer.name}}</sui-table-cell>
                         <sui-table-cell>{{racer.points}}</sui-table-cell>
                         <sui-table-cell>{{racer.crashes}}</sui-table-cell>
