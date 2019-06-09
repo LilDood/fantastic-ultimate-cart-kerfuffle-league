@@ -7,7 +7,7 @@
     <body>
         <div id='app' class="main ui text container">
             <div style="margin-top:2em;">
-                <div class="ui huge header">Fantastic Ultimate Cart Kerfuffle League</div>
+                <div class="ui huge header centered">Fantastic Ultimate Cart Kerfuffle League</div>
                 <sui-form>
                     <sui-grid :columns=15 centered>
                         <sui-grid-column :width=5>
@@ -154,6 +154,14 @@
 
             }
 
+            function watchMonth(val){
+                this.filter.race = "";
+            }
+
+            function watchYear(val){
+                this.filter.month = "";
+            }
+
             // function updateResults(){
             //     var results = window.results;
             //     app.results = aggregateResults(results);
@@ -217,6 +225,10 @@
                     filteredRaces,
                     mappedRacers,
                     filteredResults
+                },
+                watch: {
+                    'filter.month': watchMonth,
+                    'filter.year': watchYear
                 }
             })
         </script>
