@@ -43,6 +43,15 @@
                                 />
                             </sui-form-field>
                         </sui-grid-column>
+                        <sui-grid-column :width=15>
+                            <sui-form-field>
+                                <sui-input
+                                    placeholder="Search Racer..."
+                                    icon="search"
+                                    v-model="filter.racer"
+                                />
+                            </sui-form-field>
+                        </sui-grid-column>
                     </sui-grid>
                 </sui-form>
             </div>
@@ -57,8 +66,8 @@
                     </sui-table-row>
                 </sui-table-header>
                 <sui-table-body>
-                    <sui-table-row v-for="(racer, index) in filteredResults">
-                        <sui-table-cell>{{index + 1}}</sui-table-cell>
+                    <sui-table-row v-for="racer in filteredResults">
+                        <sui-table-cell>{{racer.rank}}</sui-table-cell>
                         <sui-table-cell>{{racer.name}}</sui-table-cell>
                         <sui-table-cell>{{racer.points}}</sui-table-cell>
                         <sui-table-cell>{{racer.crashes}}</sui-table-cell>
@@ -147,11 +156,13 @@
                 var race_ids = races.map(r => r.id);
                 results = self.results.filter(r => race_ids.indexOf(r.race_id) >= 0);
 
-                return aggregateResults(results);
-            }
+                var aggregated = aggregateResults(results);
 
-            function mappedRacers(){
+                if(self.filter.racer != ""){
+                    aggregated = aggregated.filter(r => r.name.toLowerCase().includes(self.filter.racer.toLowerCase()));
+                }
 
+                return aggregated;
             }
 
             function watchMonth(val){
@@ -197,7 +208,13 @@
                 });
                 var output = Object.keys(leaders).map(k => leaders[k]);
 
-                return output.sort((a, b) => b.points - a.points);
+                var sorted = output.sort((a, b) => b.points - a.points);
+
+                for(let i = 0, len = sorted.length; i < len; i++){
+                    sorted[i].rank = i + 1;
+                }
+
+                return sorted;
             }
 
             Vue.use(SemanticUIVue);
@@ -223,7 +240,6 @@
                     mappedYears,
                     filteredMonths,
                     filteredRaces,
-                    mappedRacers,
                     filteredResults
                 },
                 watch: {
