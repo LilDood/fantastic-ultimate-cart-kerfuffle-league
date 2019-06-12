@@ -73,6 +73,7 @@
                         <sui-table-header-cell>Rank</sui-table-header-cell>
                         <sui-table-header-cell>Racer</sui-table-header-cell>
                         <sui-table-header-cell>Points</sui-table-header-cell>
+                        <sui-table-header-cell v-if="filter.race === ''">Races</sui-table-header-cell>
                         <sui-table-header-cell>Crashes</sui-table-header-cell>
                     </sui-table-row>
                 </sui-table-header>
@@ -81,6 +82,7 @@
                         <sui-table-cell>{{racer.rank}}</sui-table-cell>
                         <sui-table-cell>{{racer.name}}</sui-table-cell>
                         <sui-table-cell>{{racer.points}}</sui-table-cell>
+                        <sui-table-cell v-if="filter.race === ''">{{racer.races}}</sui-table-cell>
                         <sui-table-cell>{{racer.crashes}}</sui-table-cell>
                     </sui-table-row>
                 </sui-table-body>
@@ -184,17 +186,6 @@
                 this.filter.month = "";
             }
 
-            // function updateResults(){
-            //     var results = window.results;
-            //     app.results = aggregateResults(results);
-            //     var racers = {};
-            //     for(var i = 0, len = results.length; i < len; i++){
-            //         var r = results[i];
-            //         racers[r.user_id] = r.user_name;
-            //     };
-            //     app.filterOptions.racers = Object.keys(racers).map(id => {return {value: id, text: racers[id]}});
-            // }
-
             function aggregateResults(results){
                 var leaders = {};
                 results.forEach(r => {
@@ -206,12 +197,14 @@
                         user = {
                             name: r.user_name,
                             points: 0,
-                            crashes: 0
+                            crashes: 0,
+                            races: 0
                         }
                         leaders[id] = user;
                     }
 
                     user.points += r.points;
+                    user.races += 1;
                     user.name = r.user_name;
                     if(r.note === 'CRASHED'){
                         user.crashes += 1;
