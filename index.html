@@ -27,6 +27,7 @@
                                 <sui-dropdown
                                     :options="filteredMonths"
                                     placeholder="Month"
+                                    :class="filter.year === '' ? 'disabled' : ''"
                                     selection
                                     v-model="filter.month"
                                 />
@@ -55,7 +56,17 @@
                     </sui-grid>
                 </sui-form>
             </div>
-
+            <div class="ui big header centered">
+                <span v-if="filter.race !== ''">
+                    Results for Race on {{filter.race}}
+                </span>
+                <span v-else>
+                    Leaderboard
+                    <span v-if="filter.year !== '' || filter.month !== ''">for</span>
+                    <span v-if="filter.month !== ''">{{filter.month}}</span>
+                    <span v-if="filter.year !== ''">{{filter.year}}</span>
+                </span>
+            </div>
             <sui-table celled>
                 <sui-table-header>
                     <sui-table-row>
