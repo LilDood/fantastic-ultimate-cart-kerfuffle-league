@@ -1,124 +1,15 @@
 <html>
     <head>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js"></script>
+        <script src="https://unpkg.com/vue-router@3.0.6/dist/vue-router.min.js"></script>
         <script src="https://unpkg.com/semantic-ui-vue/dist/umd/semantic-ui-vue.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.0/semantic.min.css">
     </head>
     <body>
         <div id='app' class="main ui text container">
-            <div style="margin-top:2em;">
-                <div class="ui huge header centered">Fantastic Ultimate Cart Kerfuffle League</div>
-                <sui-form>
-                    <sui-grid :columns=15 centered>
-                        <sui-grid-column :width=5>
-                            <sui-form-field>
-                                <label>Year</label>
-                                <sui-dropdown
-                                    :options="mappedYears"
-                                    placeholder="Year"
-                                    selection
-                                    v-model="filter.year"
-                                />
-                            </sui-form-field>
-                        </sui-grid-column>
-                        <sui-grid-column :width=5>
-                            <sui-form-field>
-                                <label>Month</label>
-                                <sui-dropdown
-                                    :options="filteredMonths"
-                                    placeholder="Month"
-                                    :class="filter.year === '' ? 'disabled' : ''"
-                                    selection
-                                    v-model="filter.month"
-                                />
-                            </sui-form-field>
-                        </sui-grid-column>
-                        <sui-grid-column :width=5>
-                            <sui-form-field>
-                                <label>Race</label>
-                                <sui-dropdown
-                                    :options="filteredRaces"
-                                    placeholder="Race"
-                                    selection
-                                    v-model="filter.race"
-                                />
-                            </sui-form-field>
-                        </sui-grid-column>
-                        <sui-grid-column :width=15>
-                            <sui-form-field>
-                                <sui-input
-                                    placeholder="Search Racer..."
-                                    icon="search"
-                                    v-model="filter.racer"
-                                />
-                            </sui-form-field>
-                        </sui-grid-column>
-                    </sui-grid>
-                </sui-form>
-            </div>
-            <div class="ui big header centered">
-                <span v-if="filter.race !== ''">
-                    Results for Race on {{filter.race}}
-                </span>
-                <span v-else>
-                    Leaderboard
-                    <span v-if="filter.year !== '' || filter.month !== ''">for</span>
-                    <span v-if="filter.month !== ''">{{filter.month}}</span>
-                    <span v-if="filter.year !== ''">{{filter.year}}</span>
-                </span>
-            </div>
-            <sui-table celled>
-                <sui-table-header>
-                    <sui-table-row>
-                        <sui-table-header-cell>Rank</sui-table-header-cell>
-                        <sui-table-header-cell>Racer</sui-table-header-cell>
-                        <sui-table-header-cell>Points</sui-table-header-cell>
-                        <sui-table-header-cell v-if="filter.race === ''">Races</sui-table-header-cell>
-                        <sui-table-header-cell>Crashes</sui-table-header-cell>
-                    </sui-table-row>
-                </sui-table-header>
-                <sui-table-body>
-                    <sui-table-row v-for="racer in filteredResults">
-                        <sui-table-cell>{{racer.rank}}</sui-table-cell>
-                        <sui-table-cell>{{racer.name}}</sui-table-cell>
-                        <sui-table-cell>{{racer.points}}</sui-table-cell>
-                        <sui-table-cell v-if="filter.race === ''">{{racer.races}}</sui-table-cell>
-                        <sui-table-cell>{{racer.crashes}}</sui-table-cell>
-                    </sui-table-row>
-                </sui-table-body>
-            </sui-table>
+            <router-view v-if="races && results"></router-view>
         </div>
         <script>
-            function loadRaces(data){
-                app.races = data.feed.entry.map(r => {return {
-                    date: r.gsx$date.$t,
-                    id: parseInt(r['gsx$raceno.'].$t),
-                    laps: parseInt(r.gsx$laps.$t),
-                    link: r.gsx$link.$t,
-                    month: r.gsx$month.$t,
-                    year: r.gsx$year.$t,
-                    track: r.gsx$track.$t,
-                    racers: parseInt(r.gsx$racers.$t),
-                    notes: r.gsx$notes.$t
-                }});
-            }
-
-            function loadResults(data){
-                app.results = data.feed.entry.map(r => {return {
-                    car: r.gsx$car.$t,
-                    note: r.gsx$note.$t,
-                    points: parseInt(r.gsx$points.$t),
-                    position: parseInt(r.gsx$position.$t),
-                    race_id: parseInt(r['gsx$raceno.'].$t),
-                    user_id: r.gsx$racerid.$t,
-                    user_name: r.gsx$racername.$t,
-                    time: r.gsx$time.$t,
-                    time_seconds: parseInt(r.gsx$timeseconds.$t),
-                    bestlap: r.gsx$bestlap.$t,
-                    bestlap_seconds: parseInt(r.gsx$bestlapseconds.$t)
-                }});
-            }
-
             function mappedYears(){
                 var self = this;
                 return [{ key: "", value: "", text: "All"}].concat(
@@ -221,13 +112,94 @@
                 return sorted;
             }
 
-            Vue.use(SemanticUIVue);
-            window.app = new Vue({
-                el: '#app',
-                data: {
+            const Leaderboard = {
+                template: `<div>
+                    <div style="margin-top:2em;">
+                        <div class="ui huge header centered">Fantastic Ultimate Cart Kerfuffle League</div>
+                        <sui-form>
+                            <sui-grid :columns=15 centered>
+                                <sui-grid-column :width=5>
+                                    <sui-form-field>
+                                        <label>Year</label>
+                                        <sui-dropdown
+                                            :options="mappedYears"
+                                            placeholder="Year"
+                                            selection
+                                            v-model="filter.year"
+                                        />
+                                    </sui-form-field>
+                                </sui-grid-column>
+                                <sui-grid-column :width=5>
+                                    <sui-form-field>
+                                        <label>Month</label>
+                                        <sui-dropdown
+                                            :options="filteredMonths"
+                                            placeholder="Month"
+                                            :class="filter.year === '' ? 'disabled' : ''"
+                                            selection
+                                            v-model="filter.month"
+                                        />
+                                    </sui-form-field>
+                                </sui-grid-column>
+                                <sui-grid-column :width=5>
+                                    <sui-form-field>
+                                        <label>Race</label>
+                                        <sui-dropdown
+                                            :options="filteredRaces"
+                                            placeholder="Race"
+                                            selection
+                                            v-model="filter.race"
+                                        />
+                                    </sui-form-field>
+                                </sui-grid-column>
+                                <sui-grid-column :width=15>
+                                    <sui-form-field>
+                                        <sui-input
+                                            placeholder="Search Racer..."
+                                            icon="search"
+                                            v-model="filter.racer"
+                                        />
+                                    </sui-form-field>
+                                </sui-grid-column>
+                            </sui-grid>
+                        </sui-form>
+                    </div>
+                    <div class="ui big header centered">
+                        <span v-if="filter.race !== ''">
+                            Results for Race on {{filter.race}}
+                        </span>
+                        <span v-else>
+                            Leaderboard
+                            <span v-if="filter.year !== '' || filter.month !== ''">for</span>
+                            <span v-if="filter.month !== ''">{{filter.month}}</span>
+                            <span v-if="filter.year !== ''">{{filter.year}}</span>
+                        </span>
+                    </div>
+                    <sui-table celled>
+                        <sui-table-header>
+                            <sui-table-row>
+                                <sui-table-header-cell>Rank</sui-table-header-cell>
+                                <sui-table-header-cell>Racer</sui-table-header-cell>
+                                <sui-table-header-cell>Points</sui-table-header-cell>
+                                <sui-table-header-cell v-if="filter.race === ''">Races</sui-table-header-cell>
+                                <sui-table-header-cell>Crashes</sui-table-header-cell>
+                            </sui-table-row>
+                        </sui-table-header>
+                        <sui-table-body>
+                            <sui-table-row v-for="racer in filteredResults">
+                                <sui-table-cell>{{racer.rank}}</sui-table-cell>
+                                <sui-table-cell>{{racer.name}}</sui-table-cell>
+                                <sui-table-cell>{{racer.points}}</sui-table-cell>
+                                <sui-table-cell v-if="filter.race === ''">{{racer.races}}</sui-table-cell>
+                                <sui-table-cell>{{racer.crashes}}</sui-table-cell>
+                            </sui-table-row>
+                        </sui-table-body>
+                    </sui-table>
+                </div>`,
+                data: () => ({
                     races: [],
                     results: [],
-                    filter:{
+                    filter: {
                         year: "",
                         month: "",
                         race: "",
@@ -239,7 +211,7 @@
                         months: [],
                         races: []
                     }
-                },
+                }),
                 computed: {
                     mappedYears,
                     filteredMonths,
@@ -249,8 +221,67 @@
                 watch: {
                     'filter.month': watchMonth,
                     'filter.year': watchYear
+                },
+                props: ['races', 'results']
+            }
+
+            const RacerProfile = {
+                template: ``
+            }
+        </script>
+        <script>
+            function loadRaces(data){
+                app.races = data.feed.entry.map(r => {return {
+                    date: r.gsx$date.$t,
+                    id: parseInt(r['gsx$raceno.'].$t),
+                    laps: parseInt(r.gsx$laps.$t),
+                    link: r.gsx$link.$t,
+                    month: r.gsx$month.$t,
+                    year: r.gsx$year.$t,
+                    track: r.gsx$track.$t,
+                    racers: parseInt(r.gsx$racers.$t),
+                    notes: r.gsx$notes.$t
+                }});
+            }
+
+            function loadResults(data){
+                app.results = data.feed.entry.map(r => {return {
+                    car: r.gsx$car.$t,
+                    note: r.gsx$note.$t,
+                    points: parseInt(r.gsx$points.$t),
+                    position: parseInt(r.gsx$position.$t),
+                    race_id: parseInt(r['gsx$raceno.'].$t),
+                    user_id: r.gsx$racerid.$t,
+                    user_name: r.gsx$racername.$t,
+                    time: r.gsx$time.$t,
+                    time_seconds: parseInt(r.gsx$timeseconds.$t),
+                    bestlap: r.gsx$bestlap.$t,
+                    bestlap_seconds: parseInt(r.gsx$bestlapseconds.$t)
+                }});
+            }
+
+            Vue.use(SemanticUIVue);
+            const router = new VueRouter({
+                routes: [
+                    { 
+                        path: '*', 
+                        component: Leaderboard,
+                        props: () => ({
+                            races: app.races,
+                            results: app.results
+                        })
+                    },
+                    { path: '/racer/:id', component: RacerProfile }
+                ]
+            });
+            window.app = new Vue({
+                el: '#app',
+                router,
+                data: {
+                    races: null,
+                    results: null
                 }
-            })
+            });
         </script>
         <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/oj41qk/public/values?alt=json-in-script&callback=loadRaces"></script>
         <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/orpmas5/public/values?alt=json-in-script&callback=loadResults"></script>
