@@ -285,6 +285,7 @@
                             <sui-table-row>
                                 <sui-table-header-cell>Race</sui-table-header-cell>
                                 <sui-table-header-cell>Track</sui-table-header-cell>
+                                <sui-table-header-cell>Laps</sui-table-header-cell>
                                 <sui-table-header-cell>Car</sui-table-header-cell>
                                 <sui-table-header-cell>Position</sui-table-header-cell>
                                 <sui-table-header-cell>Points</sui-table-header-cell>
@@ -295,6 +296,7 @@
                             <sui-table-row v-for="row in filteredIndividualResults">
                                 <sui-table-cell>{{row.race.date}}</sui-table-cell>
                                 <sui-table-cell>{{row.race.track}}</sui-table-cell>
+                                <sui-table-cell>{{row.race.laps}}</sui-table-cell>
                                 <sui-table-cell>{{row.car}}</sui-table-cell>
                                 <sui-table-cell>{{row.position}}</sui-table-cell>
                                 <sui-table-cell>{{row.points}}</sui-table-cell>
