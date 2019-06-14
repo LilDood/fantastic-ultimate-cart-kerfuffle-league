@@ -44,10 +44,10 @@ const RacerProfile = {
                 <router-link to="/">Back to Leaderboard</router-link>
             </div>
         </div>
-        <div class="ui huge header" v-if="!!racer">
+        <div class="ui big header" v-if="!!racer">
             {{racer.name}} - {{racer.points}} Points
             <span v-if="filter.race !== ''">
-                from Race on {{filter.race}}
+                from Race on <router-link :to="{ name: 'leaderboard', params: { filter: { race: filter.race } } }">{{filter.race}}</router-link>
             </span>
             <span v-else>
                 <span v-if="filter.year !== '' || filter.month !== ''">for</span>

@@ -188,12 +188,6 @@ const Leaderboard = {
     data: () => ({
         races: [],
         results: [],
-        filter: {
-            year: "",
-            month: "",
-            race: "",
-            racer: ""
-        },
         filterOptions: {
             racers: [],
             years: [],
@@ -211,5 +205,5 @@ const Leaderboard = {
         'filter.month': watchMonth,
         'filter.year': watchYear
     },
-    props: ['races', 'results']
+    props: ['races', 'results', 'filter']
 }
