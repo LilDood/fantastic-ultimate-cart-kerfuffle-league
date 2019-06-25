@@ -100,8 +100,6 @@ const RacerProfile = {
     data: () => ({
         races: [],
         results: [],
-        raffles: [],
-        raffleNumbers: [],
         filter: {
             year: "",
             month: "",

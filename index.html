@@ -27,7 +27,13 @@
                             const key = keys[i];
                             const col = mapping[key];
 
-                            let val = r['gsx$' + col.name].$t
+                            let val = row['gsx$' + col.name];
+                            if(!val){
+                                continue;
+                            }
+
+                            val = val.$t;
+
                             if(!!col.parse){
                                 val = col.parse(val);
                             }
@@ -107,8 +113,8 @@
                             races: app.races,
                             results: app.results,
                             racerId: route.params.id || null,
-                            raffles: app.raffles || [],
-                            raffleNumbers: app.raffleNumbers || []
+                            raffles: app.raffles,
+                            raffleNumbers: app.raffleNumbers
                         })
                     }
                 ]
@@ -118,7 +124,9 @@
                 router,
                 data: {
                     races: null,
-                    results: null
+                    results: null,
+                    raffles: [],
+                    raffleNumbers: [],
                 }
             });
         </script>
