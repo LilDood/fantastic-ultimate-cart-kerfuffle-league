@@ -106,7 +106,9 @@
                         props: (route) => ({
                             races: app.races,
                             results: app.results,
-                            racerId: route.params.id || null
+                            racerId: route.params.id || null,
+                            raffles: app.raffles || [],
+                            raffleNumbers: app.raffleNumbers || []
                         })
                     }
                 ]

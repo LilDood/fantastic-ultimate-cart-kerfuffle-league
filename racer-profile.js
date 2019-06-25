@@ -79,10 +79,29 @@ const RacerProfile = {
                 </sui-table-row>
             </sui-table-body>
         </sui-table>
+        <div class="ui big header" v-if="!!racer">
+            Raffle Entries
+        </div>
+        <sui-table celled>
+            <sui-table-header>
+                <sui-table-row>
+                    <sui-table-header-cell>Raffle</sui-table-header-cell>
+                    <sui-table-header-cell>Numbers</sui-table-header-cell>
+                </sui-table-row>
+            </sui-table-header>
+            <sui-table-body>
+                <sui-table-row v-for="raff in individualRaffles">
+                    <sui-table-cell>{{raff.raffle.month}} {{raff.raffle.year}} {{raff.raffle.race}}</sui-table-cell>
+                    <sui-table-cell>{{raff.start_number}} - {{raff.end_number}}</sui-table-cell>
+                </sui-table-row>
+            </sui-table-body>
+        </sui-table>
     </div>`,
     data: () => ({
         races: [],
         results: [],
+        raffles: [],
+        raffleNumbers: [],
         filter: {
             year: "",
             month: "",
@@ -111,11 +130,15 @@ const RacerProfile = {
                 .filter(row => row.race.month == this.filter.month || this.filter.month === "")
                 .filter(row => row.race.date == this.filter.race || this.filter.race === "")
                 .sort((a, b) => b.race_id - a.race_id);
+        },
+        individualRaffles: function(){
+            const numbers = this.raffleNumbers.filter(rn => rn.user_id == this.racerId);
+            return numbers.map(rn => ({ raffle: this.raffles.find(r => r.raffle_number == rn.raffle_number), ...rn}))
         }
     },
     watch: {
         'filter.month': watchMonth,
         'filter.year': watchYear
     },
-    props: ['races', 'results', 'racerId']
+    props: ['races', 'results', 'racerId', 'raffles', 'raffleNumbers']
 }
