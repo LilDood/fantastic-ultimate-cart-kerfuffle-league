@@ -185,16 +185,23 @@ const Leaderboard = {
             </sui-table-body>
         </sui-table>
     </div>`,
-    data: () => ({
+    data: function() { return {
         races: [],
         results: [],
+        filter: {
+            month: "",
+            year: "",
+            race: "",
+            racer: "",
+            ...this.startFilter
+        },
         filterOptions: {
             racers: [],
             years: [],
             months: [],
             races: []
         }
-    }),
+    }},
     computed: {
         mappedYears,
         filteredMonths,
@@ -205,5 +212,5 @@ const Leaderboard = {
         'filter.month': watchMonth,
         'filter.year': watchYear
     },
-    props: ['races', 'results', 'filter']
+    props: ['races', 'results', 'startFilter']
 }

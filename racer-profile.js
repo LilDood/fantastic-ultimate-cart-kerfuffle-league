@@ -69,7 +69,7 @@ const RacerProfile = {
             </sui-table-header>
             <sui-table-body>
                 <sui-table-row v-for="row in filteredIndividualResults">
-                    <sui-table-cell>{{row.race.date}}</sui-table-cell>
+                    <sui-table-cell><router-link :to="{ name: 'leaderboard', params: { filter: { race: row.race.date } } }">{{row.race.date}}</router-link></sui-table-cell>
                     <sui-table-cell>{{row.race.track}}</sui-table-cell>
                     <sui-table-cell>{{row.race.laps}}</sui-table-cell>
                     <sui-table-cell>{{row.car}}</sui-table-cell>

@@ -12,6 +12,50 @@
             <router-view v-if="races && results"></router-view>
         </div>
         <script>
+            function makeLoader(name, mapping){
+                return function(data){
+                    if(!data.feed.entry){
+                        app[name] = [];
+                        return;
+                    }
+
+                    app[name] = data.feed.entry.map(row => {
+                        obj = {};
+
+                        const keys = Object.keys(mapping);
+                        for(var i = 0, len = keys.length; i < len; i++){
+                            const key = keys[i];
+                            const col = mapping[key];
+
+                            let val = r['gsx$' + col.name].$t
+                            if(!!col.parse){
+                                val = col.parse(val);
+                            }
+                            obj[key] = val;
+                        }
+
+                        return obj;
+                    })
+                }
+            }
+
+            window.loadRaffles = makeLoader('raffles', {
+                raffle_number: { name: 'raffleno.', parse: parseInt },
+                year: { name: 'year', parse: parseInt },
+                month: { name: 'month' },
+                race: { name: 'race' },
+                number_of_prizes: { name: 'no.prizes', parse: parseInt },
+                winning_numbers: { name: 'winningnumbers' }
+            });
+
+            window.loadRaffleNumbers = makeLoader('raffleNumbers', {
+                raffle_number: { name: 'raffleno.', parse: parseInt },
+                user_id: { name: 'racerid', parse: parseInt },
+                user_name: { name: 'racername' },
+                start_number: { name: 'startnumber', parse: parseInt },
+                end_number: { name: 'endnumber', parse: parseInt }
+            });
+
             function loadRaces(data){
                 app.races = data.feed.entry.map(r => {return {
                     date: r.gsx$date.$t,
@@ -52,7 +96,7 @@
                         props: (route) => ({
                             races: app.races,
                             results: app.results,
-                            filter: { year: "",  month: "", race: "", racer: "", ...(route.params.filter || {})}
+                            startFilter: { year: "",  month: "", race: "", racer: "", ...(route.params.filter || {})}
                         })
                     },
                     { 
@@ -78,5 +122,7 @@
         </script>
         <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/oj41qk/public/values?alt=json-in-script&callback=loadRaces"></script>
         <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/orpmas5/public/values?alt=json-in-script&callback=loadResults"></script>
+        <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/odzvoje/public/values?alt=json-in-script&callback=loadRaffles"></script>
+        <script src="https://spreadsheets.google.com/feeds/list/1avHmeIS-yh8Tyc7cm9EGTc4hpoi3T8y4L80vJPiFd0U/o9aprsc/public/values?alt=json-in-script&callback=loadRaffleNumbers"></script>
     </body>
 </html>
